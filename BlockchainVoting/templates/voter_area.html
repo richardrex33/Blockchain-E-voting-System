@@ -1,0 +1,206 @@
+
+{% extends "base.html" %}
+
+{% block title %}Voter Area - Blockchain E-Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Voter Area Header -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="text-center text-white mb-4">
+                <h1 class="display-5 fw-bold fade-in">
+                    <i class="fas fa-vote-yea me-3"></i>
+                    Voter Area
+                </h1>
+                <p class="lead fade-in">
+                    Select an election and vote for your preferred candidate
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Connection Status -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="wallet-status">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div id="wallet-status">
+                            <div class="d-flex align-items-center">
+                                <div class="status-indicator bg-danger rounded-circle me-2" style="width: 10px; height: 10px;"></div>
+                                <span class="text-danger fw-bold">Wallet Not Connected</span>
+                            </div>
+                        </div>
+                        <small class="text-muted" id="wallet-address">Connect your MetaMask wallet to vote</small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <button id="connect-wallet-btn" class="btn btn-primary">
+                            <i class="fas fa-wallet me-2"></i>Connect MetaMask
+                        </button>
+                        <button id="disconnect-wallet-btn" class="btn btn-outline-danger" style="display: none;">
+                            <i class="fas fa-sign-out-alt me-2"></i>Disconnect
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Elections -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-list me-2"></i>Available Elections</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-success btn-sm me-2">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                            <button id="refresh-elections-btn" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="elections-list">
+                        <div class="text-center text-muted py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading available elections...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Selected Election Details -->
+    <div id="election-details" class="row justify-content-center mb-4" style="display: none;">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <h5 id="selected-election-title"><i class="fas fa-info-circle me-2"></i>Election Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <p id="selected-election-description" class="mb-3"></p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        <strong>Start:</strong> <span id="selected-election-start"></span>
+                                    </small>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-check me-1"></i>
+                                        <strong>End:</strong> <span id="selected-election-end"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="badge bg-success mb-2">
+                                <i class="fas fa-users me-1"></i>
+                                <span id="candidates-count">0</span> Candidates
+                            </div>
+                            <br>
+                            <button id="proceed-to-vote-btn" class="btn btn-primary" disabled>
+                                <i class="fas fa-arrow-right me-1"></i>Proceed to Vote
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Candidates List -->
+    <div id="candidates-section" class="row justify-content-center" style="display: none;">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-users me-2"></i>Candidates</h5>
+                </div>
+                <div class="card-body">
+                    <div id="candidates-list" class="row">
+                        <!-- Candidates will be populated here -->
+                    </div>
+                    
+                    <!-- Vote Submission Section -->
+                    <div id="vote-submission" class="mt-4" style="display: none;">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-6">
+                                <div class="card bg-secondary">
+                                    <div class="card-body text-center">
+                                        <h6><i class="fas fa-check-circle me-2"></i>Ready to Vote</h6>
+                                        <p class="mb-3">
+                                            Selected: <strong id="selected-candidate-name">None</strong>
+                                        </p>
+                                        <button id="cast-vote-btn" class="btn btn-success btn-lg w-100" disabled>
+                                            <i class="fas fa-vote-yea me-2"></i>Cast Vote on Blockchain
+                                        </button>
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Your vote will be recorded permanently on the blockchain
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-question-circle me-2"></i>How to Vote</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Step 1: Connect Wallet</h6>
+                            <ul class="text-muted small">
+                                <li>Install MetaMask browser extension</li>
+                                <li>Click "Connect MetaMask" button</li>
+                                <li>Approve the connection request</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Step 2: Select & Vote</h6>
+                            <ul class="text-muted small">
+                                <li>Choose an active election</li>
+                                <li>Review all candidates carefully</li>
+                                <li>Select your preferred candidate</li>
+                                <li>Cast your vote on the blockchain</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> You can only vote once per election. Make sure your selection is correct before submitting.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voter-area.js') }}"></script>
+{% endblock %}

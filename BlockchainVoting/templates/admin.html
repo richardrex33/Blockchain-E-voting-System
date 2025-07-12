@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Blockchain E-Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Admin Login Section -->
+    <div id="admin-login" class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="text-center text-white mb-4">
+                <h1 class="display-5 fw-bold fade-in">
+                    <i class="fas fa-cog me-3"></i>
+                    Admin Dashboard
+                </h1>
+                <p class="lead fade-in">
+                    Connect your wallet to access administrative functions
+                </p>
+            </div>
+            
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-shield-alt me-2"></i>Admin Authentication</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-4">
+                        Connect your MetaMask wallet to verify your admin privileges and access the dashboard.
+                    </p>
+                    
+                    <button id="connect-admin-wallet" class="btn btn-primary btn-lg">
+                        <i class="fas fa-wallet me-2"></i>Connect Admin Wallet
+                    </button>
+                    
+                    <div class="alert alert-info mt-3 mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>For demo purposes, any wallet address will be granted admin access.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" style="display: none;">
+        <!-- Dashboard Header -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-12">
+                <div class="text-center text-white mb-4">
+                    <h1 class="display-5 fw-bold">
+                        <i class="fas fa-tachometer-alt me-3"></i>
+                        Election Management Dashboard
+                    </h1>
+                    <p class="lead">Monitor elections and view real-time results</p>
+                </div>
+                
+                <!-- Admin Info Card -->
+                <div class="card voting-card mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="admin-avatar bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 50px; height: 50px;">
+                                        <i class="fas fa-user-shield"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Admin Panel</h6>
+                                        <small class="text-muted">Wallet: <span id="admin-wallet">Not connected</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <a href="{{ url_for('index') }}" class="btn btn-outline-success me-2">
+                                    <i class="fas fa-home me-1"></i>Home
+                                </a>
+                                <button id="refresh-data-btn" class="btn btn-outline-primary me-2">
+                                    <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                                </button>
+                                <div class="form-check form-switch d-inline-block">
+                                    <input class="form-check-input" type="checkbox" id="real-time-updates">
+                                    <label class="form-check-label" for="real-time-updates">
+                                        Real-time Updates
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-12">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-poll fa-2x mb-2"></i>
+                                <h3 class="card-title" id="total-elections">0</h3>
+                                <p class="card-text">Total Elections</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-play fa-2x mb-2"></i>
+                                <h3 class="card-title" id="active-elections">0</h3>
+                                <p class="card-text">Active Elections</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <i class="fas fa-vote-yea fa-2x mb-2"></i>
+                                <h3 class="card-title" id="total-votes">0</h3>
+                                <p class="card-text">Total Votes Cast</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Election Management Tabs -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-12">
+                <div class="card voting-card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="adminTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="elections-tab" data-bs-toggle="tab" data-bs-target="#elections-pane" type="button">
+                                    <i class="fas fa-list me-1"></i>Elections Overview
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="create-election-tab" data-bs-toggle="tab" data-bs-target="#create-election-pane" type="button">
+                                    <i class="fas fa-plus me-1"></i>Create Election
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="manage-candidates-tab" data-bs-toggle="tab" data-bs-target="#manage-candidates-pane" type="button">
+                                    <i class="fas fa-users me-1"></i>Manage Candidates
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="adminTabsContent">
+                            <!-- Elections Overview Tab -->
+                            <div class="tab-pane fade show active" id="elections-pane" role="tabpanel">
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Election Title</th>
+                                                <th>Total Votes</th>
+                                                <th>Candidates</th>
+                                                <th>Status</th>
+                                                <th>Start Date</th>
+                                                <th>End Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="elections-table-body">
+                                            <!-- Elections will be populated here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <!-- Create Election Tab -->
+                            <div class="tab-pane fade" id="create-election-pane" role="tabpanel">
+                                <form id="create-election-form">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="election-title" class="form-label">Election Title</label>
+                                            <input type="text" class="form-control" id="election-title" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="election-status" class="form-label">Status</label>
+                                            <select class="form-select" id="election-status">
+                                                <option value="true">Active</option>
+                                                <option value="false">Inactive</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="election-description" class="form-label">Description</label>
+                                        <textarea class="form-control" id="election-description" rows="3" required></textarea>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="start-date" class="form-label">Start Date & Time</label>
+                                            <input type="datetime-local" class="form-control" id="start-date" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="end-date" class="form-label">End Date & Time</label>
+                                            <input type="datetime-local" class="form-control" id="end-date" required>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus me-1"></i>Create Election
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Manage Candidates Tab -->
+                            <div class="tab-pane fade" id="manage-candidates-pane" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="candidate-election-select" class="form-label">Select Election</label>
+                                        <select class="form-select" id="candidate-election-select">
+                                            <option value="">Choose an election...</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 d-flex align-items-end">
+                                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addCandidateModal">
+                                            <i class="fas fa-plus me-1"></i>Add Candidate
+                                        </button>
+                                        <button class="btn btn-outline-primary" onclick="loadCandidates()">
+                                            <i class="fas fa-sync me-1"></i>Refresh
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="candidates-list">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="fas fa-users fa-3x mb-3"></i>
+                                        <p>Select an election above to manage candidates</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <div class="card voting-card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Election Results</h5>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <select id="election-select" class="form-select" style="max-width: 300px; display: inline-block;">
+                                    <option value="">Select an election...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="current-election-info" style="display: none;">
+                            <h6 id="current-election-title" class="mb-3"></h6>
+                        </div>
+                        
+                        <!-- Results Chart -->
+                        <div id="results-chart-container" class="mb-4" style="display: none;">
+                            <canvas id="results-chart-canvas" width="800" height="400"></canvas>
+                        </div>
+                        
+                        <!-- Results List -->
+                        <div id="results-container">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                                <p>Select an election from the dropdown above to view results</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="text-center py-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-white">Loading dashboard data...</p>
+        </div>
+    </div>
+
+    <!-- Features Information -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h5><i class="fas fa-tools me-2"></i>Admin Features</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                            <h6>Real-time Monitoring</h6>
+                            <p class="small text-muted">Monitor vote counts and election progress in real-time</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-shield-check fa-2x text-success mb-2"></i>
+                            <h6>Secure Access</h6>
+                            <p class="small text-muted">Wallet-based authentication ensures only authorized access</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-database fa-2x text-info mb-2"></i>
+                            <h6>Blockchain Verification</h6>
+                            <p class="small text-muted">All data is verified against blockchain records</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Detail Modal -->
+<div class="modal fade" id="resultsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-pie me-2"></i>Detailed Results
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modal-results-content">
+                    <!-- Detailed results will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="window.print()">
+                    <i class="fas fa-print me-1"></i>Print Results
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Floating Button -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1000;">
+    <div class="dropdown dropup">
+        <button class="btn btn-primary rounded-circle" type="button" data-bs-toggle="dropdown" style="width: 60px; height: 60px;">
+            <i class="fas fa-plus"></i>
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('index') }}">
+                <i class="fas fa-home me-2"></i>Go to Elections
+            </a></li>
+            <li><a class="dropdown-item" href="{{ url_for('verification') }}">
+                <i class="fas fa-search me-2"></i>Verify Vote
+            </a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" href="#" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-2"></i>Refresh Page
+            </a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Add Candidate Modal -->
+<div class="modal fade" id="addCandidateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>Add New Candidate
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-candidate-form">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="candidate-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="candidate-name" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="candidate-age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="candidate-age" min="18" max="100">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="candidate-party" class="form-label">Party</label>
+                            <input type="text" class="form-control" id="candidate-party" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="candidate-location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="candidate-location" placeholder="City, State/Country" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="candidate-topic" class="form-label">Topic/Category</label>
+                            <select class="form-select" id="candidate-topic" required>
+                                <option value="">Select a topic...</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Economy">Economy</option>
+                                <option value="Environment">Environment</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Sports & Recreation">Sports & Recreation</option>
+                                <option value="Arts & Culture">Arts & Culture</option>
+                                <option value="Student Welfare">Student Welfare</option>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="candidate-logo" class="form-label">Photo URL</label>
+                            <input type="url" class="form-control" id="candidate-logo" placeholder="https://example.com/photo.jpg">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="text-center">
+                                <img id="candidate-image-preview" src="" alt="Candidate Preview" 
+                                     class="rounded-circle d-none" width="100" height="100" 
+                                     style="object-fit: cover; border: 3px solid #0d6efd;">
+                                <div id="image-placeholder" class="d-flex align-items-center justify-content-center rounded-circle mx-auto" 
+                                     style="width: 100px; height: 100px; background-color: #f8f9fa; border: 2px dashed #dee2e6;">
+                                    <i class="fas fa-user fa-2x text-muted"></i>
+                                </div>
+                                <small class="text-muted d-block mt-2">Image preview will appear here</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="candidate-description" class="form-label">Short Description</label>
+                        <textarea class="form-control" id="candidate-description" rows="2" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="candidate-education" class="form-label">Education</label>
+                        <textarea class="form-control" id="candidate-education" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="candidate-experience" class="form-label">Experience</label>
+                        <textarea class="form-control" id="candidate-experience" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="candidate-manifesto" class="form-label">Campaign Manifesto</label>
+                        <textarea class="form-control" id="candidate-manifesto" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCandidateDetails()">
+                    <i class="fas fa-save me-1"></i>Save Candidate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Candidate Modal -->
+<div class="modal fade" id="editCandidateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-edit me-2"></i>Edit Candidate
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-candidate-form">
+                    <input type="hidden" id="edit-candidate-id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit-candidate-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="edit-candidate-name" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="edit-candidate-age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="edit-candidate-age" min="18" max="100">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="edit-candidate-party" class="form-label">Party</label>
+                            <input type="text" class="form-control" id="edit-candidate-party" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="edit-candidate-location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="edit-candidate-location" placeholder="City, State/Country" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="edit-candidate-topic" class="form-label">Topic/Category</label>
+                            <select class="form-select" id="edit-candidate-topic" required>
+                                <option value="">Select a topic...</option>
+                                <option value="Education">Education</option>
+                                <option value="Healthcare">Healthcare</option>
+                                <option value="Economy">Economy</option>
+                                <option value="Environment">Environment</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Sports & Recreation">Sports & Recreation</option>
+                                <option value="Arts & Culture">Arts & Culture</option>
+                                <option value="Student Welfare">Student Welfare</option>
+                                <option value="Infrastructure">Infrastructure</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="edit-candidate-logo" class="form-label">Photo URL</label>
+                            <input type="url" class="form-control" id="edit-candidate-logo">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <div class="text-center">
+                                <img id="edit-candidate-image-preview" src="" alt="Candidate Preview" 
+                                     class="rounded-circle d-none" width="100" height="100" 
+                                     style="object-fit: cover; border: 3px solid #0d6efd;">
+                                <div id="edit-image-placeholder" class="d-flex align-items-center justify-content-center rounded-circle mx-auto" 
+                                     style="width: 100px; height: 100px; background-color: #f8f9fa; border: 2px dashed #dee2e6;">
+                                    <i class="fas fa-user fa-2x text-muted"></i>
+                                </div>
+                                <small class="text-muted d-block mt-2">Image preview will appear here</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-candidate-description" class="form-label">Short Description</label>
+                        <textarea class="form-control" id="edit-candidate-description" rows="2" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-candidate-education" class="form-label">Education</label>
+                        <textarea class="form-control" id="edit-candidate-education" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-candidate-experience" class="form-label">Experience</label>
+                        <textarea class="form-control" id="edit-candidate-experience" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-candidate-manifesto" class="form-label">Campaign Manifesto</label>
+                        <textarea class="form-control" id="edit-candidate-manifesto" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateCandidateDetails()">
+                    <i class="fas fa-save me-1"></i>Update Candidate
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+    // Additional admin-specific functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-refresh data every 2 minutes if real-time updates are enabled
+        setInterval(function() {
+            const realTimeToggle = document.getElementById('real-time-updates');
+            if (realTimeToggle && realTimeToggle.checked && window.adminDashboard) {
+                window.adminDashboard.loadDashboardData();
+            }
+        }, 120000);
+        
+        // Handle election selection change
+        const electionSelect = document.getElementById('election-select');
+        if (electionSelect) {
+            electionSelect.addEventListener('change', function() {
+                const resultsContainer = document.getElementById('results-container');
+                const currentElectionInfo = document.getElementById('current-election-info');
+                
+                if (this.value) {
+                    currentElectionInfo.style.display = 'block';
+                } else {
+                    currentElectionInfo.style.display = 'none';
+                    resultsContainer.innerHTML = `
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-chart-bar fa-3x mb-3"></i>
+                            <p>Select an election from the dropdown above to view results</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

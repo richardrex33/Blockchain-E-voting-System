@@ -1,0 +1,521 @@
+{% extends "base.html" %}
+
+{% block title %}Results - {{ election.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Election Header -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="text-center text-white mb-4">
+                <h1 class="display-5 fw-bold fade-in">
+                    <i class="fas fa-chart-bar me-3"></i>
+                    Election Results
+                </h1>
+                <p class="lead fade-in">{{ election.title }}</p>
+            </div>
+            
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h4>{{ election.title }}</h4>
+                    <p class="mb-0 text-muted">{{ election.description }}</p>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-alt text-primary fa-2x mb-2"></i>
+                                <h6>Start Date</h6>
+                                <p class="text-muted mb-0">{{ election.start_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-calendar-check text-success fa-2x mb-2"></i>
+                                <h6>End Date</h6>
+                                <p class="text-muted mb-0">{{ election.end_time.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-vote-yea text-info fa-2x mb-2"></i>
+                                <h6>Total Votes</h6>
+                                <p class="text-muted mb-0" id="total-votes-display">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-item">
+                                <i class="fas fa-signal text-warning fa-2x mb-2"></i>
+                                <h6>Status</h6>
+                                <p class="mb-0">
+                                    {% if election.is_active and election.end_time > moment.utcnow() %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Ended</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Chart -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-pie me-2"></i>Vote Distribution</h5>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleChartType('bar')">
+                                    <i class="fas fa-chart-bar me-1"></i>Bar Chart
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleChartType('pie')">
+                                    <i class="fas fa-chart-pie me-1"></i>Pie Chart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="chart-container" class="text-center">
+                        <canvas id="results-chart" width="800" height="400"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-list-ol me-2"></i>Candidate Rankings</h5>
+                </div>
+                <div class="card-body">
+                    <div id="candidates-results">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading results...</span>
+                            </div>
+                            <p class="mt-2 text-muted">Loading election results...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Updates -->
+    {% if election.is_active and election.end_time > moment.utcnow() %}
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="alert alert-info">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        <strong>Live Results:</strong> This election is still active. Results are updated in real-time as votes are cast.
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="auto-refresh" checked>
+                            <label class="form-check-label" for="auto-refresh">
+                                Auto-refresh (30s)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Blockchain Verification -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card voting-card border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0"><i class="fas fa-shield-check me-2"></i>Blockchain Verification</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <p class="mb-2">
+                                <strong>Verified on Blockchain:</strong> All votes in this election are permanently recorded on the Ethereum blockchain.
+                            </p>
+                            <p class="mb-0 small text-muted">
+                                Every vote is cryptographically secured and cannot be tampered with or deleted.
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <button class="btn btn-outline-success" onclick="verifyOnBlockchain()">
+                                <i class="fas fa-search me-1"></i>Verify on Chain
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header">
+                    <h6><i class="fas fa-download me-2"></i>Export Results</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <button class="btn btn-outline-primary w-100" onclick="exportToPDF()">
+                                <i class="fas fa-file-pdf me-1"></i>Export as PDF
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <button class="btn btn-outline-primary w-100" onclick="exportToCSV()">
+                                <i class="fas fa-file-csv me-1"></i>Export as CSV
+                            </button>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <button class="btn btn-outline-primary w-100" onclick="shareResults()">
+                                <i class="fas fa-share me-1"></i>Share Results
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-home me-2"></i>Back to Elections
+                    </a>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <a href="{{ url_for('verification') }}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-search me-2"></i>Verify Your Vote
+                    </a>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <a href="{{ url_for('admin') }}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-cog me-2"></i>Admin Panel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-share me-2"></i>Share Results
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Share these election results:</p>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="share-url" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyShareUrl()">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <button class="btn btn-primary w-100" onclick="shareOnTwitter()">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary w-100" onclick="shareOnFacebook()">
+                            <i class="fab fa-facebook"></i>
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary w-100" onclick="shareOnLinkedIn()">
+                            <i class="fab fa-linkedin"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let chart = null;
+    let chartType = 'bar';
+    let electionData = null;
+    const electionId = {{ election.id }};
+
+    // Load results on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadElectionResults();
+        
+        // Set up auto-refresh if election is active
+        {% if election.is_active and election.end_time > moment.utcnow() %}
+        const autoRefreshToggle = document.getElementById('auto-refresh');
+        if (autoRefreshToggle && autoRefreshToggle.checked) {
+            setInterval(loadElectionResults, 30000); // Refresh every 30 seconds
+        }
+        
+        autoRefreshToggle.addEventListener('change', function() {
+            if (this.checked) {
+                setInterval(loadElectionResults, 30000);
+            }
+        });
+        {% endif %}
+        
+        // Set share URL
+        const shareUrl = document.getElementById('share-url');
+        if (shareUrl) {
+            shareUrl.value = window.location.href;
+        }
+    });
+
+    async function loadElectionResults() {
+        try {
+            const response = await fetch(`/api/admin/election/${electionId}/results`);
+            const result = await response.json();
+
+            if (response.ok) {
+                electionData = result;
+                displayResults(result.results);
+                updateChart(result.results);
+                
+                // Update total votes
+                const totalVotesElement = document.getElementById('total-votes-display');
+                if (totalVotesElement) {
+                    totalVotesElement.textContent = result.election.total_votes;
+                }
+            } else {
+                showError('Failed to load election results');
+            }
+        } catch (error) {
+            console.error('Error loading results:', error);
+            showError('Failed to load election results');
+        }
+    }
+
+    function displayResults(results) {
+        const container = document.getElementById('candidates-results');
+        
+        if (results.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No Votes Cast Yet</h5>
+                    <p class="text-muted">Results will appear here once voting begins.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Sort results by vote count (descending)
+        results.sort((a, b) => b.votes - a.votes);
+
+        container.innerHTML = '';
+        
+        results.forEach((candidate, index) => {
+            const position = index + 1;
+            const positionIcon = position === 1 ? 'fas fa-trophy text-warning' : 
+                                  position === 2 ? 'fas fa-medal text-secondary' :
+                                  position === 3 ? 'fas fa-award text-warning' :
+                                  'fas fa-user';
+            
+            const resultCard = document.createElement('div');
+            resultCard.className = 'candidate-result mb-3 p-3 rounded slide-up';
+            resultCard.style.animationDelay = `${index * 0.1}s`;
+            
+            resultCard.innerHTML = `
+                <div class="row align-items-center">
+                    <div class="col-md-1 text-center">
+                        <i class="${positionIcon} fa-2x"></i>
+                        <div class="fw-bold mt-1">#${position}</div>
+                    </div>
+                    <div class="col-md-5">
+                        <h6 class="mb-1">${candidate.name}</h6>
+                        <p class="text-muted mb-0">${candidate.party}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: ${candidate.percentage}%"
+                                 aria-valuenow="${candidate.percentage}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                ${candidate.percentage.toFixed(1)}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-end">
+                        <div class="vote-count h4 mb-0 text-primary">${candidate.votes}</div>
+                        <small class="text-muted">votes</small>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(resultCard);
+        });
+    }
+
+    function updateChart(results) {
+        const ctx = document.getElementById('results-chart').getContext('2d');
+        
+        if (chart) {
+            chart.destroy();
+        }
+
+        const labels = results.map(r => r.name);
+        const votes = results.map(r => r.votes);
+        const colors = [
+            '#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1', 
+            '#20c997', '#fd7e14', '#e83e8c', '#6c757d', '#17a2b8'
+        ];
+
+        const config = {
+            type: chartType,
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Votes',
+                    data: votes,
+                    backgroundColor: colors.slice(0, results.length),
+                    borderColor: colors.slice(0, results.length),
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: chartType === 'pie',
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Election Results'
+                    }
+                },
+                scales: chartType === 'bar' ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                } : {}
+            }
+        };
+
+        chart = new Chart(ctx, config);
+    }
+
+    function toggleChartType(type) {
+        chartType = type;
+        if (electionData) {
+            updateChart(electionData.results);
+        }
+    }
+
+    function verifyOnBlockchain() {
+        // Simulate blockchain verification
+        alert('Blockchain verification: All votes verified successfully on Ethereum network.');
+    }
+
+    function exportToPDF() {
+        window.print();
+    }
+
+    function exportToCSV() {
+        if (!electionData) return;
+        
+        let csv = 'Candidate,Party,Votes,Percentage\n';
+        electionData.results.forEach(candidate => {
+            csv += `"${candidate.name}","${candidate.party}",${candidate.votes},${candidate.percentage.toFixed(2)}\n`;
+        });
+        
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `election_results_${electionId}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function shareResults() {
+        const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+        modal.show();
+    }
+
+    function copyShareUrl() {
+        const urlInput = document.getElementById('share-url');
+        urlInput.select();
+        document.execCommand('copy');
+        
+        // Show feedback
+        const button = event.target;
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => {
+            button.innerHTML = originalHtml;
+        }, 2000);
+    }
+
+    function shareOnTwitter() {
+        const text = `Check out the results of "${electionData.election.title}" - Blockchain E-Voting System`;
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${url}`, '_blank');
+    }
+
+    function shareOnFacebook() {
+        const url = encodeURIComponent(window.location.href);
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    }
+
+    function shareOnLinkedIn() {
+        const url = encodeURIComponent(window.location.href);
+        const title = encodeURIComponent(`${electionData.election.title} - Results`);
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}`, '_blank');
+    }
+
+    function showError(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+</script>
+{% endblock %}

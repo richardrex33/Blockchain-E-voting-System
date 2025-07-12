@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Blockchain E-Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="text-center text-white mb-5">
+                <h1 class="display-4 fw-bold mb-3 fade-in">
+                    <i class="fas fa-vote-yea me-3"></i>
+                    Blockchain E-Voting System
+                </h1>
+                <p class="lead mb-4 fade-in">
+                    Secure, transparent, and decentralized voting powered by blockchain technology
+                </p>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-8">
+                        <div class="row text-center">
+                            <div class="col-md-4 mb-3">
+                                <div class="feature-icon">
+                                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                                    <h6>Secure</h6>
+                                    <small>Blockchain protection</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="feature-icon">
+                                    <i class="fas fa-eye fa-2x text-info mb-2"></i>
+                                    <h6>Transparent</h6>
+                                    <small>Verifiable results</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="feature-icon">
+                                    <i class="fas fa-users fa-2x text-warning mb-2"></i>
+                                    <h6>Democratic</h6>
+                                    <small>One person, one vote</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Demo Data Initialization -->
+    {% if not elections %}
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-database me-2"></i>Initialize Demo Data</h4>
+                </div>
+                <div class="card-body text-center">
+                    <p class="mb-3">
+                        Welcome to the Blockchain E-Voting System! This is a college project demonstration.
+                        Click the button below to initialize sample election data.
+                    </p>
+                    <button id="init-demo-btn" class="btn btn-primary btn-lg">
+                        <i class="fas fa-play me-2"></i>Initialize Demo Election
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Active Elections -->
+    {% if elections %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="text-white text-center mb-4">
+                <i class="fas fa-ballot-check me-2"></i>Active Elections
+            </h2>
+
+            <div class="row">
+                {% for election in elections %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card voting-card h-100 fade-in">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-vote-yea me-2"></i>{{ election.title }}
+                            </h5>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <p class="text-muted mb-3">{{ election.description }}</p>
+
+                            <div class="election-info mb-3">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <small class="text-muted">Start Date:</small>
+                                        <div class="fw-bold">{{ election.start_time.strftime('%Y-%m-%d') }}</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted">End Date:</small>
+                                        <div class="fw-bold">{{ election.end_time.strftime('%Y-%m-%d') }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="election-status mb-3">
+                                {% if election.is_active %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-play me-1"></i>Active
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-stop me-1"></i>Ended
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="mt-auto">
+                                {% if election.is_active %}
+                                    <a href="{{ url_for('voting', election_id=election.id) }}" 
+                                       class="btn btn-primary w-100">
+                                        <i class="fas fa-vote-yea me-2"></i>Vote Now
+                                    </a>
+                                    <a href="{{ url_for('results', election_id=election.id) }}" 
+                                       class="btn btn-outline-primary w-100 mt-2">
+                                        <i class="fas fa-chart-bar me-2"></i>View Results
+                                    </a>
+                                {% else %}
+                                    <a href="{{ url_for('results', election_id=election.id) }}" 
+                                       class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-chart-bar me-2"></i>View Final Results
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- How It Works Section -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-info-circle me-2"></i>How It Works</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-4">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-wallet fa-3x text-primary"></i>
+                            </div>
+                            <h6>1. Connect Wallet</h6>
+                            <p class="small text-muted">Connect your MetaMask wallet to authenticate your identity</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-4">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-user-check fa-3x text-success"></i>
+                            </div>
+                            <h6>2. Select Candidate</h6>
+                            <p class="small text-muted">Choose your preferred candidate from the available options</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-4">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-paper-plane fa-3x text-info"></i>
+                            </div>
+                            <h6>3. Cast Vote</h6>
+                            <p class="small text-muted">Submit your vote securely to the blockchain network</p>
+                        </div>
+                        <div class="col-md-3 text-center mb-4">
+                            <div class="step-icon mb-3">
+                                <i class="fas fa-certificate fa-3x text-warning"></i>
+                            </div>
+                            <h6>4. Get Verification</h6>
+                            <p class="small text-muted">Receive a verification code to confirm your vote later</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row justify-content-center mt-4 mb-5">
+        <div class="col-lg-8">
+            <div class="text-center">
+                <a href="{{ url_for('voter_area') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-vote-yea me-2"></i>Go to Voter Area
+                </a>
+                <a href="{{ url_for('verification') }}" class="btn btn-outline-light btn-lg me-3">
+                    <i class="fas fa-search me-2"></i>Verify Your Vote
+                </a>
+                <a href="{{ url_for('admin') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-cog me-2"></i>Admin Panel
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voting.js') }}"></script>
+{% endblock %}
+
+<script>
+// Function to load active elections
+async function loadActiveElections() {
+    try {
+        const response = await fetch('/api/admin/elections');
+        const result = await response.json();
+
+        if (response.ok) {
+            const activeElections = result.elections.filter(election => 
+                election.is_active && new Date(election.end_time) > new Date()
+            );
+
+            displayElections(activeElections);
+        }
+    } catch (error) {
+        console.error('Error loading elections:', error);
+    }
+}
+
+function displayElections(elections) {
+    const container = document.querySelector('.row');
+    const existingElections = container.querySelectorAll('.col-md-6');
+
+    // Remove existing elections
+    existingElections.forEach(el => el.remove());
+
+    if (elections.length === 0) {
+        container.innerHTML = `
+            <div class="col-12 text-center">
+                <div class="alert alert-info">
+                    <h4>No Active Elections</h4>
+                    <p>There are currently no active elections. Check back later!</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    elections.forEach(election => {
+        const electionCard = document.createElement('div');
+        electionCard.className = 'col-md-6 mb-4';
+        electionCard.innerHTML = `
+            <div class="card election-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">${election.title}</h5>
+                    <p class="card-text">${election.description}</p>
+                    <div class="election-meta">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Ends: ${new Date(election.end_time).toLocaleDateString()}
+                        </small>
+                        <br>
+                        <small class="text-muted">
+                            <i class="fas fa-users me-1"></i>
+                            ${election.candidate_count || 0} candidates
+                        </small>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <a href="/voting/${election.id}" class="btn btn-primary btn-block w-100">
+                        <i class="fas fa-vote-yea me-1"></i>
+                        Vote Now
+                    </a>
+                </div>
+            </div>
+        `;
+        container.appendChild(electionCard);
+    });
+}
+
+// Load elections on page load
+document.addEventListener('DOMContentLoaded', loadActiveElections);
+
+// Refresh elections every 30 seconds
+setInterval(loadActiveElections, 30000);
+</script>
+</body>
+</html>

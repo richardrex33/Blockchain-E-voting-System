@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Your Vote - Blockchain E-Voting System{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row justify-content-center mb-4">
+        <div class="col-lg-8">
+            <div class="text-center text-white mb-4">
+                <h1 class="display-5 fw-bold fade-in">
+                    <i class="fas fa-search me-3"></i>
+                    Verify Your Vote
+                </h1>
+                <p class="lead fade-in">
+                    Enter your verification code to confirm your vote was recorded correctly
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-certificate me-2"></i>Vote Verification</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label for="verification-code-input" class="form-label">
+                            <i class="fas fa-key me-1"></i>Verification Code
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg text-center" 
+                               id="verification-code-input" 
+                               placeholder="Enter your 8-character code"
+                               maxlength="8"
+                               style="letter-spacing: 0.2em; font-family: 'Courier New', monospace;">
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This code was provided after you cast your vote
+                        </div>
+                    </div>
+                    
+                    <button id="verify-code-btn" class="btn btn-primary btn-lg w-100">
+                        <i class="fas fa-search me-2"></i>Verify Vote
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Result -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div id="verification-result" style="display: none;">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- How Verification Works -->
+    <div class="row justify-content-center mt-5">
+        <div class="col-lg-10">
+            <div class="card voting-card">
+                <div class="card-header text-center">
+                    <h5><i class="fas fa-info-circle me-2"></i>How Vote Verification Works</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="verification-step">
+                                <i class="fas fa-vote-yea fa-3x text-primary mb-3"></i>
+                                <h6>1. Cast Vote</h6>
+                                <p class="small text-muted">After voting, you receive a unique verification code</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="verification-step">
+                                <i class="fas fa-database fa-3x text-success mb-3"></i>
+                                <h6>2. Blockchain Storage</h6>
+                                <p class="small text-muted">Your vote is permanently recorded on the blockchain</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-4">
+                            <div class="verification-step">
+                                <i class="fas fa-check-circle fa-3x text-info mb-3"></i>
+                                <h6>3. Verify Anytime</h6>
+                                <p class="small text-muted">Use your code to confirm your vote details</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4 mb-0">
+                        <div class="row align-items-center">
+                            <div class="col-md-1 text-center">
+                                <i class="fas fa-shield-alt fa-2x"></i>
+                            </div>
+                            <div class="col-md-11">
+                                <h6 class="mb-1">Security & Privacy</h6>
+                                <p class="mb-0 small">
+                                    Your verification code is linked to your vote but doesn't reveal your identity. 
+                                    The blockchain ensures your vote cannot be tampered with or deleted.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sample Verification Code (for demo) -->
+    <div class="row justify-content-center mt-4">
+        <div class="col-lg-8">
+            <div class="card voting-card border-warning">
+                <div class="card-header bg-warning text-dark text-center">
+                    <h6 class="mb-0"><i class="fas fa-flask me-2"></i>Demo Information</h6>
+                </div>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>For demonstration purposes:</strong> If you haven't voted yet, you can use sample verification codes:
+                    </p>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <code class="bg-light text-dark p-2 rounded d-block mb-2">DEMO1234</code>
+                            <small class="text-muted">Sample Code 1</small>
+                        </div>
+                        <div class="col-md-4">
+                            <code class="bg-light text-dark p-2 rounded d-block mb-2">TEST5678</code>
+                            <small class="text-muted">Sample Code 2</small>
+                        </div>
+                        <div class="col-md-4">
+                            <code class="bg-light text-dark p-2 rounded d-block mb-2">VOTE9012</code>
+                            <small class="text-muted">Sample Code 3</small>
+                        </div>
+                    </div>
+                    <p class="mt-3 mb-0 small text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        In a real election, codes would only be provided after casting an actual vote.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Actions -->
+    <div class="row justify-content-center mt-4 mb-5">
+        <div class="col-lg-6">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-home me-2"></i>Back to Elections
+                    </a>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <a href="{{ url_for('admin') }}" class="btn btn-outline-light w-100">
+                        <i class="fas fa-chart-bar me-2"></i>View Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Verification Error
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="error-message">An error occurred during verification.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/voting.js') }}"></script>
+<script>
+    // Auto-format verification code input
+    document.addEventListener('DOMContentLoaded', function() {
+        const codeInput = document.getElementById('verification-code-input');
+        
+        if (codeInput) {
+            codeInput.addEventListener('input', function(e) {
+                // Convert to uppercase and limit to alphanumeric
+                let value = e.target.value.upper().replace(/[^A-Z0-9]/g, '');
+                e.target.value = value;
+            });
+            
+            codeInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                let paste = (e.clipboardData || window.clipboardData).getData('text');
+                let cleanPaste = paste.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 8);
+                e.target.value = cleanPaste;
+            });
+        }
+        
+        // Focus on code input
+        if (codeInput) {
+            codeInput.focus();
+        }
+    });
+</script>
+{% endblock %}
